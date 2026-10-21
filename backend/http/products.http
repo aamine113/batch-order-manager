@@ -1,0 +1,204 @@
+@baseUrl = http://localhost:3000
+@productId = 6ad7c4a209dca46ec8c6fe95
+
+### POST REQUESTS                        
+--------------------------------------------------------------------------------------------------
+
+### Create a product (all fields)
+# @name createProduct
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Sample product A",
+  "description": "Sample description",
+  "unitPrice": 1250,
+  "unitWeightGrams": 1000,
+  "available": true
+}
+
+### Create a product (required fields only, available defaults server-side)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Sample product B",
+  "unitPrice": 600,
+  "unitWeightGrams": 500
+}
+
+### Name is trimmed before validation (expect 201, name "Sample product C")
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "   Sample product C   ",
+  "unitPrice": 900,
+  "unitWeightGrams": 400
+}
+
+### Invalid: name too short (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "A",
+  "unitPrice": 100,
+  "unitWeightGrams": 100
+}
+
+### Invalid: negative price (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Negative price",
+  "unitPrice": -1,
+  "unitWeightGrams": 100
+}
+
+### Invalid: non-integer price, price is in cents (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Decimal price",
+  "unitPrice": 12.5,
+  "unitWeightGrams": 100
+}
+
+### Invalid: weight must be at least 1 gram (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Zero weight",
+  "unitPrice": 100,
+  "unitWeightGrams": 0
+}
+
+### Invalid: missing required fields (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Missing fields"
+}
+
+### Invalid: unknown property, forbidNonWhitelisted (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Unknown field",
+  "unitPrice": 100,
+  "unitWeightGrams": 100,
+  "stock": 10
+}
+
+### PATCH REQUESTS                        
+--------------------------------------------------------------------------------------------------
+
+### PATCH failure: valid ObjectId that matches no product (expect 404)
+PATCH {{baseUrl}}/products/000000000000000000000000
+Content-Type: application/json
+
+{
+  "unitPrice": 1500
+}
+
+### PATCH failure: not an ObjectId (expect 400)
+PATCH {{baseUrl}}/products/not-an-id
+Content-Type: application/json
+
+{
+  "unitPrice": 1500
+}
+
+### PATCH failure: invalid value, weight below 1 (expect 400)
+PATCH {{baseUrl}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "unitWeightGrams": -90
+}
+
+### PATCH failure: unknown property (expect 400)
+PATCH {{baseUrl}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "stock": 10
+}
+
+### PATCH failure: name already used by another product (expect 409)
+# Create "Sample product B" first (second POST above), then rename the product to it
+PATCH {{baseUrl}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Sample product B"
+}
+
+### PATCH a product
+PATCH {{baseUrl}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Sample product A",
+  "description": "Sample description",
+  "unitPrice": 1250,
+  "unitWeightGrams": 1000,
+  "available": true
+}
+
+### DELETE REQUESTS                        
+--------------------------------------------------------------------------------------------------
+
+### DELETE failure: valid ObjectId that matches no product (expect 404)
+DELETE {{baseUrl}}/products/000000000000000000000000
+
+### DELETE failure: not an ObjectId (expect 400)
+DELETE {{baseUrl}}/products/not-an-id
+
+### DELETE a product
+DELETE {{baseUrl}}/products/{{productId}}
+
+### GET REQUESTS                        
+--------------------------------------------------------------------------------------------------
+
+### Verify: list products
+GET {{baseUrl}}/products
+
+### Verify: get product by ID
+GET {{baseUrl}}/products/{{productId}}
+
+### GET failure: valid ObjectId that matches no product (expect 404)
+GET {{baseUrl}}/products/000000000000000000000000
+
+### GET failure: not an ObjectId, plain word (expect 400)
+GET {{baseUrl}}/products/not-an-id
+
+### GET failure: numeric ID (expect 400)
+GET {{baseUrl}}/products/12345
+
+### GET failure: 23 hex characters, one too short (expect 400)
+GET {{baseUrl}}/products/6ad73453a3112ca261dd47e
+
+### GET failure: 25 hex characters, one too long (expect 400)
+GET {{baseUrl}}/products/6ad73453a3112ca261dd47eea
+
+### GET failure: 24 characters but not hex (expect 400)
+GET {{baseUrl}}/products/zzzzzzzzzzzzzzzzzzzzzzzz
+
+### GET failure: ID with an encoded space (expect 400)
+GET {{baseUrl}}/products/6ad73453a3112ca261dd47e%20
+
+### GET failure: NoSQL injection attempt as ID, {"$ne":""} (expect 400)
+GET {{baseUrl}}/products/%7B%22%24ne%22%3A%22%22%7D
+
+### GET failure: extra path segment, no such route (expect 404)
+GET {{baseUrl}}/products/{{productId}}/reviews
+
+### GET failure: unknown resource (expect 404)
+GET {{baseUrl}}/product/{{productId}}
