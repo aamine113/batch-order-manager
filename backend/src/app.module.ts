@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ProductsModule } from './products/products.module.js';
+import { BatchesModule } from './batches/batches.module.js';
+import { APP_PIPE } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -15,8 +17,19 @@ import { ProductsModule } from './products/products.module.js';
       }),
     }),
     ProductsModule,
+    BatchesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    },
+  ],
 })
 export class AppModule {}

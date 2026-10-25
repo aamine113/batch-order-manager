@@ -1,0 +1,272 @@
+@baseUrl = http://localhost:3000
+@batchId = 6addc5800a695200798d9120
+
+### POST REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### Create a batch
+# @name createBatch
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "Sample batch A",
+  "maxWeightGrams": 20000,
+  "orderDeadline": "2100-12-01T00:00:00.000Z"
+}
+
+### Name is trimmed before validation (expect 201, name "Sample batch B")
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "   Sample batch B   ",
+  "maxWeightGrams": 15000,
+  "orderDeadline": "2100-12-15"
+}
+
+### Invalid: name too short (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "A",
+  "maxWeightGrams": 20000,
+  "orderDeadline": "2100-12-01T00:00:00.000Z"
+}
+
+### Invalid: maximum weight must be at least 1 gram (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "Zero weight",
+  "maxWeightGrams": 0,
+  "orderDeadline": "2100-12-01T00:00:00.000Z"
+}
+
+### Invalid: non-integer maximum weight (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "Decimal weight",
+  "maxWeightGrams": 1000.5,
+  "orderDeadline": "2100-12-01T00:00:00.000Z"
+}
+
+### Invalid: deadline is not an ISO date (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "Bad deadline",
+  "maxWeightGrams": 20000,
+  "orderDeadline": "next friday"
+}
+
+### Invalid: deadline is an impossible calendar date, strict ISO check (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "Impossible deadline",
+  "maxWeightGrams": 20000,
+  "orderDeadline": "2100-02-30"
+}
+
+### Invalid: deadline is in the past (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "Past deadline",
+  "maxWeightGrams": 20000,
+  "orderDeadline": "2000-01-01T00:00:00.000Z"
+}
+
+### Invalid: missing required fields (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "Missing fields"
+}
+
+### Invalid: status is not whitelisted on create, forbidNonWhitelisted (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "With status",
+  "maxWeightGrams": 20000,
+  "orderDeadline": "2100-12-01T00:00:00.000Z",
+  "status": "open"
+}
+
+### Invalid: currentWeightGrams is not whitelisted on create, forbidNonWhitelisted (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "With weight",
+  "maxWeightGrams": 20000,
+  "orderDeadline": "2100-12-01T00:00:00.000Z",
+  "currentWeightGrams": 500
+}
+
+### TRANSITION REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### Transition: draft to open (expect 200 on a draft batch)
+POST {{baseUrl}}/batches/{{batchId}}/transition
+Content-Type: application/json
+
+{
+  "status": "open"
+}
+
+### Transition: open to closed (expect 200 on an open batch)
+POST {{baseUrl}}/batches/{{batchId}}/transition
+Content-Type: application/json
+
+{
+  "status": "closed"
+}
+
+### Transition: closed to open (expect 200 on a closed batch)
+POST {{baseUrl}}/batches/{{batchId}}/transition
+Content-Type: application/json
+
+{
+  "status": "open"
+}
+
+### Transition failure: back to draft is never allowed (expect 409)
+POST {{baseUrl}}/batches/{{batchId}}/transition
+Content-Type: application/json
+
+{
+  "status": "draft"
+}
+
+### Transition failure: status is not a valid enum value, IsEnum (expect 400)
+POST {{baseUrl}}/batches/{{batchId}}/transition
+Content-Type: application/json
+
+{
+  "status": "archived"
+}
+
+### Transition failure: missing status (expect 400)
+POST {{baseUrl}}/batches/{{batchId}}/transition
+Content-Type: application/json
+
+{}
+
+### Transition failure: valid ObjectId that matches no batch (expect 404)
+POST {{baseUrl}}/batches/000000000000000000000000/transition
+Content-Type: application/json
+
+{
+  "status": "open"
+}
+
+### Transition failure: not an ObjectId (expect 400)
+POST {{baseUrl}}/batches/not-an-id/transition
+Content-Type: application/json
+
+{
+  "status": "open"
+}
+
+### PATCH REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### PATCH failure: valid ObjectId that matches no batch (expect 404)
+PATCH {{baseUrl}}/batches/000000000000000000000000
+Content-Type: application/json
+
+{
+  "maxWeightGrams": 25000
+}
+
+### PATCH failure: not an ObjectId (expect 400)
+PATCH {{baseUrl}}/batches/not-an-id
+Content-Type: application/json
+
+{
+  "maxWeightGrams": 25000
+}
+
+### PATCH failure: status is not whitelisted, forbidNonWhitelisted (expect 400)
+PATCH {{baseUrl}}/batches/{{batchId}}
+Content-Type: application/json
+
+{
+  "status": "shipped"
+}
+
+### PATCH failure: currentWeightGrams is not whitelisted, forbidNonWhitelisted (expect 400)
+PATCH {{baseUrl}}/batches/{{batchId}}
+Content-Type: application/json
+
+{
+  "currentWeightGrams": 0
+}
+
+### PATCH failure: maximum weight below the current weight (expect 409 when currentWeightGrams > 1)
+PATCH {{baseUrl}}/batches/{{batchId}}
+Content-Type: application/json
+
+{
+  "maxWeightGrams": 1
+}
+
+### PATCH failure: deadline is in the past (expect 400)
+PATCH {{baseUrl}}/batches/{{batchId}}
+Content-Type: application/json
+
+{
+  "orderDeadline": "2000-01-01T00:00:00.000Z"
+}
+
+### PATCH a batch
+PATCH {{baseUrl}}/batches/{{batchId}}
+Content-Type: application/json
+
+{
+  "name": "Sample batch A",
+  "maxWeightGrams": 25000,
+  "orderDeadline": "2100-12-10T00:00:00.000Z"
+}
+
+### DELETE REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### DELETE failure: batch is not a draft (expect 409 once it has been opened)
+DELETE {{baseUrl}}/batches/{{batchId}}
+
+### DELETE failure: valid ObjectId that matches no batch (expect 404)
+DELETE {{baseUrl}}/batches/000000000000000000000000
+
+### DELETE failure: not an ObjectId (expect 400)
+DELETE {{baseUrl}}/batches/not-an-id
+
+### DELETE a draft batch (expect 204)
+DELETE {{baseUrl}}/batches/{{batchId}}
+
+### GET REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### Verify: list batches
+GET {{baseUrl}}/batches
+
+### Verify: get batch by ID
+GET {{baseUrl}}/batches/{{batchId}}
+
+### GET failure: valid ObjectId that matches no batch (expect 404)
+GET {{baseUrl}}/batches/000000000000000000000000
+
+### GET failure: not an ObjectId (expect 400)
+GET {{baseUrl}}/batches/not-an-id
