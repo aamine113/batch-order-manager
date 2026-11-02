@@ -8,11 +8,19 @@ disable-model-invocation: true
 
 Follow these steps in order. Stop and wait for the developer's answer wherever a step says so.
 
-## 1. Inspect the changes
+## 1. Check the branch
+
+Run `git branch --show-current`. If the current branch is not `main`, go to step 2.
+
+If it is `main`, do not commit on it. Look at the pending changes (`git status`, `git diff --staged` and `git diff`) and suggest a branch name in the form `<type>/<short-description>`, where `<type>` is one of `feat`, `fix`, `chore`, `ci`, `docs`, `refactor`, `test`, and `<short-description>` is a few lowercase words joined by hyphens, for example `feat/user-registration`.
+
+Wait for the developer to accept or change the name. Then run `git switch -c <branch>`. Uncommitted changes, staged or not, carry over to the new branch.
+
+## 2. Inspect the changes
 
 Run `git status` and `git diff --staged`. If nothing is staged, show the unstaged changes and ask the developer what to stage. Do not stage files yourself unless asked.
 
-## 2. Offer a review
+## 3. Offer a review
 
 Offer to run `/code-review medium` on the staged changes, and mention `/simplify` as an optional extra pass for code quality. Wait for the developer's choice; they may skip both.
 
@@ -21,7 +29,7 @@ Offer to run `/code-review medium` on the staged changes, and mention `/simplify
 
 Any fix leaves unstaged changes. Ask the developer to review and stage them before moving on.
 
-## 3. Run the checks
+## 4. Run the checks
 
 From `backend/`, run the same checks CI runs:
 
@@ -31,7 +39,7 @@ npm run lint && npm run build && npm test
 
 If a check fails, report the output and stop. Do not commit on a failing check, and do not fix the failure without asking.
 
-## 4. Check the staged diff against the public-repository rules
+## 5. Check the staged diff against the public-repository rules
 
 Go through the staged diff and confirm that:
 
@@ -42,7 +50,7 @@ Go through the staged diff and confirm that:
 
 Report any finding with the file and line, and stop until the developer resolves it.
 
-## 5. Propose how to split the commits
+## 6. Propose how to split the commits
 
 Decide whether the staged changes belong in one commit or several. Suggest a split when the changes cover more than one concern, for example:
 
@@ -59,12 +67,12 @@ Every commit must build and pass the tests on its own. Order the commits so that
 
 For each proposed commit, list the files it contains and its message. Wait for the developer to accept or change the plan.
 
-## 6. Write the commit messages
+## 7. Write the commit messages
 
-Use Conventional Commits: `feat:`, `fix:`, `chore:`, `ci:`, `docs:`, `test:`, with a scope when it helps, such as `feat(users):`. Keep the subject line under 72 characters, in the imperative mood, without a trailing period. Add a body only when the reason for the change is not obvious from the subject.
+Use Conventional Commits: `feat:`, `fix:`, `chore:`, `ci:`, `docs:`, `refactor:`, `test:`, with a scope when it helps, such as `feat(users):`. Keep the subject line under 72 characters, in the imperative mood, without a trailing period. Add a body only when the reason for the change is not obvious from the subject.
 
 Show the final messages and wait for the developer's approval before committing.
 
-## 7. Commit
+## 8. Commit
 
 Create the commits in the agreed order, staging only the files planned for each one. Afterwards, run `git log --oneline` for the new commits and `git status` to confirm the tree is in the expected state. Do not push.

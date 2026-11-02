@@ -30,7 +30,7 @@ npm run lint && npm run build && npm test   # the checks CI runs
 
 ## Conventions
 
-- Conventional Commits: `feat:`, `fix:`, `chore:`, `ci:`, `docs:`, `test:`.
+- Conventional Commits: `feat:`, `fix:`, `chore:`, `ci:`, `docs:`, `refactor:`, `test:`.
 - Every commit goes through the `/commit` skill (`.claude/skills/commit/`): review, checks, private-details check, commit split, messages.
 - Strict TypeScript. No `any` without a comment explaining why.
 - Validate every endpoint input with DTOs. Guard routes by role (admin, client).
@@ -39,6 +39,15 @@ npm run lint && npm run build && npm test   # the checks CI runs
 - Keep constants and helper functions out of classes: put them in their own dedicated files and import them.
 - A service takes a DTO directly when the HTTP shape matches what is stored. Otherwise it defines its own input type in `<module>/types/`.
 - Do not run `npm audit fix --force`.
+
+## Branching and PRs
+
+- `main` is protected: changes land only through a pull request, with a rebase merge, linear history and the `backend` status check passing.
+- Never commit on `main`. Work on a branch named `<type>/<short-description>`, with `<type>` one of `feat`, `fix`, `chore`, `ci`, `docs`, `refactor`, `test`. `/commit` stops on `main` and proposes a branch name.
+- Every pull request goes through the `/pr` skill (`.claude/skills/pr/`): branch and commit checks, rebase onto `origin/main`, title and body draft, private-details check, push, `gh pr create`.
+- Inside `/commit` and `/pr`, Claude runs the checks and the `git` and `gh` commands itself; every decision stays with the developer.
+- `--force-with-lease` only after a rebase and with the developer's confirmation. Never `--force`.
+- Claude never merges a pull request. Merging is the developer's decision.
 
 ## Domain rules
 
@@ -52,7 +61,7 @@ The domain rules live in the private specification (see below). Read it before f
 
 ## Working agreements
 
-- The developer runs installs and commands. Guide one step at a time and wait for confirmation before the next one. Exception: inside the `/commit` skill, Claude runs the checks and the git commands itself.
+- The developer runs installs and commands. Guide one step at a time and wait for confirmation before the next one. Exception: inside the `/commit` and `/pr` skills, Claude runs the checks and the `git` and `gh` commands itself.
 - The developer writes the capacity-enforcement service and its concurrency test personally. Claude reviews them but does not write them.
 - Review the spec section with the developer before starting each milestone.
 - Challenge a design decision when it looks wrong, with the trade-offs, rather than implementing it silently.
