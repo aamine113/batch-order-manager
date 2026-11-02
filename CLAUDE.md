@@ -31,10 +31,13 @@ npm run lint && npm run build && npm test   # the checks CI runs
 ## Conventions
 
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `ci:`, `docs:`, `test:`.
+- Every commit goes through the `/commit` skill (`.claude/skills/commit/`): review, checks, private-details check, commit split, messages.
 - Strict TypeScript. No `any` without a comment explaining why.
 - Validate every endpoint input with DTOs. Guard routes by role (admin, client).
 - Document every route with OpenAPI decorators.
 - Money and weight calculations live on the server and are unit tested. Never trust totals sent by the client.
+- Keep constants and helper functions out of classes: put them in their own dedicated files and import them.
+- A service takes a DTO directly when the HTTP shape matches what is stored. Otherwise it defines its own input type in `<module>/types/`.
 - Do not run `npm audit fix --force`.
 
 ## Domain rules
@@ -49,7 +52,7 @@ The domain rules live in the private specification (see below). Read it before f
 
 ## Working agreements
 
-- The developer runs installs and commands. Guide one step at a time and wait for confirmation before the next one.
+- The developer runs installs and commands. Guide one step at a time and wait for confirmation before the next one. Exception: inside the `/commit` skill, Claude runs the checks and the git commands itself.
 - The developer writes the capacity-enforcement service and its concurrency test personally. Claude reviews them but does not write them.
 - Review the spec section with the developer before starting each milestone.
 - Challenge a design decision when it looks wrong, with the trade-offs, rather than implementing it silently.
