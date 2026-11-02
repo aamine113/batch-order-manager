@@ -1,9 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
 import { baseSchemaOptions } from '../../common/schema/base-schema-options.js';
 import { BatchStatus } from '../enums/batch-status.enum.js';
-
-export type BatchDocument = HydratedDocument<Batch>;
 
 @Schema(baseSchemaOptions)
 export class Batch {

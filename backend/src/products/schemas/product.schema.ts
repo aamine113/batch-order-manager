@@ -1,8 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
 import { baseSchemaOptions } from '../../common/schema/base-schema-options.js';
-
-export type ProductDocument = HydratedDocument<Product>;
 
 @Schema(baseSchemaOptions)
 export class Product {
