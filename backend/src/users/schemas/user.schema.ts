@@ -25,3 +25,8 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ email: 1 }, { unique: true });
+// Only admin documents enter this index, so at most one admin can exist.
+UserSchema.index(
+  { role: 1 },
+  { unique: true, partialFilterExpression: { role: UserRole.Admin } },
+);
