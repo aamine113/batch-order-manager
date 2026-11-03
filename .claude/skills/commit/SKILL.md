@@ -63,7 +63,7 @@ Every commit must build and pass the tests on its own. Order the commits so that
 
 - Commit a module before the code that imports it, including its registration in `app.module.ts`.
 - Keep a dependency change in `package.json` and `package-lock.json` in the same commit as the first code that uses it.
-- Keep a unit test in the same commit as the code it tests, or in a later one.
+- Keep a unit test in the same commit as the code it tests.
 
 For each proposed commit, list the files it contains and its message. Wait for the developer to accept or change the plan.
 

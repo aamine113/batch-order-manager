@@ -2,12 +2,13 @@
 
 Guidance for Claude when working in this repository. Keep this file short and update it when a convention changes.
 
+Current state and next steps (private, see "Private project docs"):
+
+@~/dev/batch-order-manager/private-docs/HANDOFF.md
+
 ## Project
 
 Order manager for group order batches with a weight limit. It is also a portfolio project, so code quality, tests and documentation matter as much as features.
-
-- Full requirements: private specification, kept outside the repository. Ask the developer for the relevant section before starting a milestone.
-- Current status: Milestone 1 (setup, MongoDB, CI) done. Next: Milestone 2 (users and auth, products, batches).
 
 ## Stack and layout
 
@@ -30,8 +31,9 @@ npm run lint && npm run build && npm test   # the checks CI runs
 
 ## Conventions
 
+- Commit only through the `/commit` skill (`.claude/skills/commit/`).
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `ci:`, `docs:`, `refactor:`, `test:`.
-- Every commit goes through the `/commit` skill (`.claude/skills/commit/`): review, checks, private-details check, commit split, messages.
+- Tests go in the same commit as the code they test.
 - Strict TypeScript. No `any` without a comment explaining why.
 - Validate every endpoint input with DTOs. Guard routes by role (admin, client).
 - Document every route with OpenAPI decorators.
@@ -42,16 +44,13 @@ npm run lint && npm run build && npm test   # the checks CI runs
 
 ## Branching and PRs
 
-- `main` is protected: changes land only through a pull request, with a rebase merge, linear history and the `backend` status check passing.
-- Never commit on `main`. Work on a branch named `<type>/<short-description>`, with `<type>` one of `feat`, `fix`, `chore`, `ci`, `docs`, `refactor`, `test`. `/commit` stops on `main` and proposes a branch name.
+- `main` is protected: changes land only through a rebase-merged pull request with the `backend` status check passing.
+- Never commit on `main`. One branch per task, named `<type>/<short-description>`, with `<type>` one of `feat`, `fix`, `chore`, `ci`, `docs`, `refactor`, `test`. `/commit` stops on `main` and proposes a branch name.
 - Every pull request goes through the `/pr` skill (`.claude/skills/pr/`): branch and commit checks, rebase onto `origin/main`, title and body draft, private-details check, push, `gh pr create`.
+- Review fixes go in as `git commit --fixup=<sha>` commits. `/pr` folds them before merge.
 - Inside `/commit` and `/pr`, Claude runs the checks and the `git` and `gh` commands itself; every decision stays with the developer.
 - `--force-with-lease` only after a rebase and with the developer's confirmation. Never `--force`.
 - Claude never merges a pull request. Merging is the developer's decision.
-
-## Domain rules
-
-The domain rules live in the private specification (see below). Read it before feature work and do not restate them in tracked files.
 
 ## Atomicity and concurrency
 
@@ -74,8 +73,16 @@ The domain rules live in the private specification (see below). Read it before f
 
 ## Private project docs
 
-- `private-docs/` is a gitignored folder with the project specification (`SPEC.md`). It is the source of truth for requirements, data model, API and milestones. Read it at the start of a session and before any feature work.
-- It is never pushed to the public repository. Never stage, commit or copy it.
-- Never quote it or paraphrase its wording in commit messages, code comments, README, Swagger text, test names, seed data or any other tracked file. Business names, brand names, client details and storefront names must not appear anywhere in tracked files.
+`private-docs/` is gitignored and is its own private Git repository. Worktrees do not contain it: always use the main checkout's copy at `~/dev/batch-order-manager/private-docs/`. In this file and in `.claude/skills/`, `private-docs/` means that folder.
+
+- `~/dev/batch-order-manager/private-docs/SPEC.md`: requirements and decisions, the source of truth. Too large to import: before designing or implementing a feature, read the relevant section.
+- `~/dev/batch-order-manager/private-docs/SETUP.md`: dev setup and GitHub workflow. Read it when a task touches the environment, CI or GitHub settings.
+- `~/dev/batch-order-manager/private-docs/HANDOFF.md`: current state and next steps, imported above.
+
+Rules:
+
+- Never stage, commit or copy anything from `private-docs/` into this repository.
+- Nothing from `private-docs/` may appear anywhere in this public repository or on GitHub: commit messages, PR titles and bodies, code comments, README, Swagger text, test names, seed data, skills in `.claude/skills/`, this file. Do not quote or paraphrase it. Domain rules, business names, brand names, client details and storefront names stay out of tracked files.
 - Use neutral naming in the code (for example "batch", "client", "product").
-- Before every commit, run `git diff --staged` and check it for private details. If a spec change is needed, tell me; I update the spec myself.
+- Before every commit, run `git diff --staged` and check it for private details.
+- Claude may edit the files in `private-docs/`, including `SPEC.md`, but asks the developer for confirmation before each change.
