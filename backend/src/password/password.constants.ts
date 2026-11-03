@@ -12,3 +12,9 @@ export const ARGON2_OPTIONS: Options = {
   timeCost: 2,
   parallelism: 1,
 };
+
+// Shared by every flow that sets a password. Lengths count Unicode code
+// points, not UTF-16 units, so an emoji counts as one character.
+export const PASSWORD_MIN_LENGTH = 12;
+export const PASSWORD_MAX_LENGTH = 128;
+export const PASSWORD_LENGTH_MESSAGE = `The password must be ${PASSWORD_MIN_LENGTH} to ${PASSWORD_MAX_LENGTH} characters long.`;
