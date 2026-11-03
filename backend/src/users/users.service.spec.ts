@@ -108,11 +108,54 @@ describe('UsersService', () => {
       );
     });
 
+    it('throws an admin ConflictException when the admin index rejects the write', async () => {
+      userModel.create.mockRejectedValue({
+        ...duplicateKeyError,
+        keyPattern: { role: 1 },
+      });
+
+      await expect(service.create(input)).rejects.toThrow(
+        new ConflictException('An admin already exists.'),
+      );
+    });
+
+    it('throws an email ConflictException when the email index rejects the write', async () => {
+      userModel.create.mockRejectedValue({
+        ...duplicateKeyError,
+        keyPattern: { email: 1 },
+      });
+
+      await expect(service.create(input)).rejects.toThrow(
+        new ConflictException('A user with this email already exists.'),
+      );
+    });
+
     it('rethrows any other error unchanged', async () => {
       const error = new Error('connection lost');
       userModel.create.mockRejectedValue(error);
 
       await expect(service.create(input)).rejects.toBe(error);
+    });
+  });
+
+  describe('findAdmin', () => {
+    const adminRecord: UserRecord = { ...userRecord, role: UserRole.Admin };
+
+    it('looks the user up by the admin role', async () => {
+      const findQuery = query(adminRecord);
+      userModel.findOne.mockReturnValue(findQuery);
+
+      const admin = await service.findAdmin();
+
+      expect(userModel.findOne).toHaveBeenCalledWith({ role: UserRole.Admin });
+      expect(findQuery.select).not.toHaveBeenCalled();
+      expect(admin).toEqual(adminRecord);
+    });
+
+    it('returns null when no admin exists', async () => {
+      userModel.findOne.mockReturnValue(query(null));
+
+      await expect(service.findAdmin()).resolves.toBeNull();
     });
   });
 

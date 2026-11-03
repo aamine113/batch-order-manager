@@ -35,4 +35,14 @@ describe('UserSchema', () => {
       expect.objectContaining({ unique: true }),
     ]);
   });
+
+  it('declares a unique index on role limited to admins', () => {
+    expect(UserSchema.indexes()).toContainEqual([
+      { role: 1 },
+      expect.objectContaining({
+        unique: true,
+        partialFilterExpression: { role: UserRole.Admin },
+      }),
+    ]);
+  });
 });

@@ -2,10 +2,12 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, isObjectIdOrHexString, Model } from 'mongoose';
 import { User } from './schemas/user.schema.js';
+import { UserRole } from './enums/user-role.enum.js';
 import { CreateUserInput } from './types/create-user-input.js';
 import { UserRecord, UserRecordWithPassword } from './types/user-record.js';
 import { normalizeEmail } from './normalize-email.js';
 import { isDuplicateKeyError } from '../common/mongo/is-duplicate-key-error.js';
+import { duplicateKeyFields } from '../common/mongo/duplicate-key-fields.js';
 
 // TODO: map users to a response DTO before returning them over HTTP. Lean and
 // toObject() results skip the schema's toJSON transform, so they carry `_id`
@@ -32,11 +34,21 @@ export class UsersService {
         created.toObject<UserRecordWithPassword>();
       return user;
     } catch (error: unknown) {
+      if (duplicateKeyFields(error).includes('role')) {
+        throw new ConflictException('An admin already exists.');
+      }
       if (isDuplicateKeyError(error)) {
         throw new ConflictException('A user with this email already exists.');
       }
       throw error;
     }
+  }
+
+  async findAdmin(): Promise<UserRecord | null> {
+    return this.userModel
+      .findOne({ role: UserRole.Admin })
+      .lean<UserRecord>()
+      .exec();
   }
 
   // HTTP callers will validate the id with a param DTO first. This check
