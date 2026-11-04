@@ -20,6 +20,7 @@ function userRecord(overrides: Partial<UserRecord>): UserRecord {
     email,
     name: 'Admin',
     role: UserRole.Admin,
+    disabled: false,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),
     ...overrides,

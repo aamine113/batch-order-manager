@@ -21,6 +21,9 @@ export class User {
     default: UserRole.Client,
   })
   role!: UserRole;
+
+  @Prop({ default: false })
+  disabled!: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
