@@ -29,6 +29,12 @@ describe('UserSchema', () => {
     expect(user.role).toBe(UserRole.Client);
   });
 
+  it('defaults disabled to false', () => {
+    const user = new UserModel({ email: 'jane@example.com' });
+
+    expect(user.disabled).toBe(false);
+  });
+
   it('declares a unique index on email', () => {
     expect(UserSchema.indexes()).toContainEqual([
       { email: 1 },
