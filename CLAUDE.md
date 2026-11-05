@@ -37,6 +37,7 @@ npm run lint && npm run build && npm test   # the checks CI runs
 - Strict TypeScript. No `any` without a comment explaining why.
 - Validate every endpoint input with DTOs. Guard routes by role (admin, client).
 - Document every route with OpenAPI decorators.
+- Every new or changed route gets a request in `backend/http/<module>.http`, in the same commit. No real tokens or passwords in these files.
 - Money and weight calculations live on the server and are unit tested. Never trust totals sent by the client.
 - Keep constants and helper functions out of classes: put them in their own dedicated files and import them.
 - A service takes a DTO directly when the HTTP shape matches what is stored. Otherwise it defines its own input type in `<module>/types/`.
