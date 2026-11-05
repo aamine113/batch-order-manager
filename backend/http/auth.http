@@ -1,0 +1,89 @@
+@baseUrl = http://localhost:3000
+# Read from backend/.env: REST Client's $dotenv searches parent folders for the nearest .env.
+@adminEmail = {{$dotenv ADMIN_EMAIL}}
+@adminPassword = {{$dotenv ADMIN_PASSWORD}}
+
+# The login route allows 5 requests per minute per IP, 400s included (6th gives 429).
+# Wait a minute between sections to avoid hitting the limit halfway through.
+
+### LOGIN
+# --------------------------------------------------------------------------------------------------
+
+### Valid login (expect 200 with accessToken: decode it, check sub, role, exp - iat = 3600, HS256)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### Email is trimmed and lowercased (expect 200 if adminEmail is lowercase)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "  Admin@Example.com ",
+  "password": "{{adminPassword}}"
+}
+
+### Wrong password (expect 401, same body as unknown email)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "wrong-password-123"
+}
+
+### Unknown email (expect 401, same body as wrong password)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "nobody@example.com",
+  "password": "wrong-password-123"
+}
+
+### VALIDATION
+# --------------------------------------------------------------------------------------------------
+
+### Invalid: extra body field (expect 400)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}",
+  "role": "admin"
+}
+
+### Invalid: malformed email (expect 400)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "{{adminPassword}}"
+}
+
+### Invalid: empty password (expect 400)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": ""
+}
+
+### Invalid: missing body (expect 400)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{}
+
+### RATE LIMITING
+# --------------------------------------------------------------------------------------------------
+
+# After a one-minute pause, send "Unknown email" 6 times: the 6th gives 429.
