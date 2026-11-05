@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ProductsModule } from './products/products.module.js';
 import { BatchesModule } from './batches/batches.module.js';
 import { APP_PIPE } from '@nestjs/core';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { APP_PIPE } from '@nestjs/core';
     }),
     ProductsModule,
     BatchesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
