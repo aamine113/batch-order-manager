@@ -18,6 +18,8 @@ Wait for the developer to accept or change the name. Then run `git switch -c <br
 
 ## 2. Inspect the changes
 
+First, check for open review notes: if `review-notes.md` at the repository root has unticked (`- [ ]`) lines, list them and stop. Offer `/review-notes`. Continue only if the developer explicitly chooses to commit with the notes still open.
+
 Run `git status` and `git diff --staged`. If nothing is staged, show the unstaged changes and ask the developer what to stage. Do not stage files yourself unless asked.
 
 ## 3. Offer a review

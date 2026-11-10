@@ -32,6 +32,7 @@ npm run lint && npm run build && npm test   # the checks CI runs
 ## Conventions
 
 - Commit only through the `/commit` skill (`.claude/skills/commit/`).
+- While implementing a plan, feedback on a rejected edit is filed as a review note unless it starts with `fix:`. See "Review notes".
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `ci:`, `docs:`, `refactor:`, `test:`.
 - Tests go in the same commit as the code they test.
 - Strict TypeScript. No `any` without a comment explaining why.
@@ -65,6 +66,20 @@ npm run lint && npm run build && npm test   # the checks CI runs
 - The developer writes the capacity-enforcement service and its concurrency test personally. Claude reviews them but does not write them.
 - Review the spec section with the developer before starting each milestone.
 - Challenge a design decision when it looks wrong, with the trade-offs, rather than implementing it silently.
+
+## Review notes
+
+While implementing a plan, feedback given when rejecting a proposed edit is a review note by default, with no prefix needed:
+
+1. Append a line to `review-notes.md` at the repository root (create it if missing; keep it out of Git through `.git/info/exclude`):
+   ``- [ ] <path> | `<anchor>` | <note>``
+   - `<path>`: relative to the repository root.
+   - `<anchor>`: the most distinctive line of the edit (of `old_string` for a deletion), without backticks, used to find the code again.
+   - `<note>`: the feedback verbatim; everything after the anchor's closing `` ` | ``.
+2. Reply with one line, `Noted: <path>`, without answering or acting on the note.
+3. Propose the same edit again, unchanged.
+
+Feedback starting with `fix:`, and any feedback outside plan implementation (including inside `/commit` and `/review-notes`), is a correction: apply it right away and do not file it.
 
 ## Public repository rules
 
