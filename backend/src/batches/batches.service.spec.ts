@@ -1,6 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
+import { trustedOperator } from '../common/mongo/trusted-operator.js';
 import { BatchesService } from './batches.service.js';
 import { CreateBatchDto } from './dto/create-batch.dto.js';
 import { UpdateBatchDto } from './dto/update-batch.dto.js';
@@ -137,7 +138,7 @@ describe('BatchesService', () => {
       await service.update(batchId, dto);
 
       expect(batchModel.findOneAndUpdate).toHaveBeenCalledWith(
-        { _id: batchId, currentWeightGrams: { $lte: 15000 } },
+        { _id: batchId, currentWeightGrams: trustedOperator({ $lte: 15000 }) },
         dto,
         { returnDocument: 'after', runValidators: true },
       );
@@ -169,9 +170,9 @@ describe('BatchesService', () => {
       const updated = batchWith({ status: BatchStatus.Open });
       batchModel.findOneAndUpdate.mockReturnValue(queryResolving(updated));
 
-      await expect(
-        service.transition(batchId, BatchStatus.Open),
-      ).resolves.toBe(updated);
+      await expect(service.transition(batchId, BatchStatus.Open)).resolves.toBe(
+        updated,
+      );
     });
 
     it('only matches statuses allowed to move to the target', async () => {
@@ -182,7 +183,9 @@ describe('BatchesService', () => {
       expect(batchModel.findOneAndUpdate).toHaveBeenCalledWith(
         {
           _id: batchId,
-          status: { $in: [BatchStatus.Draft, BatchStatus.Closed] },
+          status: trustedOperator({
+            $in: [BatchStatus.Draft, BatchStatus.Closed],
+          }),
         },
         { status: BatchStatus.Open },
         { returnDocument: 'after', runValidators: true },
@@ -197,7 +200,7 @@ describe('BatchesService', () => {
         service.transition(batchId, BatchStatus.Draft),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(batchModel.findOneAndUpdate).toHaveBeenCalledWith(
-        { _id: batchId, status: { $in: [] } },
+        { _id: batchId, status: trustedOperator({ $in: [] }) },
         { status: BatchStatus.Draft },
         { returnDocument: 'after', runValidators: true },
       );

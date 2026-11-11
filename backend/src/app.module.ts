@@ -15,6 +15,7 @@ import { AuthModule } from './auth/auth.module.js';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         uri: config.getOrThrow<string>('MONGODB_URI'),
+        sanitizeFilter: true,
       }),
     }),
     ProductsModule,

@@ -13,6 +13,7 @@ import {
   BATCH_TRANSITION_NOT_ALLOWED,
 } from './batches.constants.js';
 import { throwNotFoundOrConflict } from '../common/mongo/throw-not-found-or-conflict.js';
+import { trustedOperator } from '../common/mongo/trusted-operator.js';
 
 @Injectable()
 export class BatchesService {
@@ -40,7 +41,10 @@ export class BatchesService {
     const filter =
       dto.maxWeightGrams === undefined
         ? { _id: id }
-        : { _id: id, currentWeightGrams: { $lte: dto.maxWeightGrams } };
+        : {
+            _id: id,
+            currentWeightGrams: trustedOperator({ $lte: dto.maxWeightGrams }),
+          };
 
     const batch = await this.batchModel
       .findOneAndUpdate(filter, dto, {
@@ -69,7 +73,7 @@ export class BatchesService {
 
     const batch = await this.batchModel
       .findOneAndUpdate(
-        { _id: id, status: { $in: sources } },
+        { _id: id, status: trustedOperator({ $in: sources }) },
         { status: target },
         { returnDocument: 'after', runValidators: true },
       )
