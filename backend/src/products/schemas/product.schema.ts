@@ -1,5 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { baseSchemaOptions } from '../../common/schema/base-schema-options.js';
+import {
+  PRODUCT_UNIT_PRICE_MAX_CENTS,
+  PRODUCT_UNIT_WEIGHT_MAX_GRAMS,
+} from '../products.constants.js';
 
 @Schema(baseSchemaOptions)
 export class Product {
@@ -17,9 +21,10 @@ export class Product {
   @Prop({
     required: true,
     min: 0,
+    max: PRODUCT_UNIT_PRICE_MAX_CENTS,
     validate: {
       validator: Number.isInteger,
-      message: 'unitprice must be an integer number of cents',
+      message: 'unitPrice must be an integer number of cents',
     },
   })
   unitPrice!: number;
@@ -27,6 +32,7 @@ export class Product {
   @Prop({
     required: true,
     min: 1,
+    max: PRODUCT_UNIT_WEIGHT_MAX_GRAMS,
     validate: {
       validator: Number.isInteger,
       message: 'unitWeightGrams must be an integer',

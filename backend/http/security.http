@@ -44,3 +44,16 @@ Content-Type: application/json
   "unitPrice": 100,
   "unitWeightGrams": 100
 }
+
+### NUMBER BOUND REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### Number bound: 1e300 passes IsInt, rejected by Max (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Huge price",
+  "unitPrice": 1e300,
+  "unitWeightGrams": 100
+}

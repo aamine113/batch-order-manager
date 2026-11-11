@@ -5,9 +5,14 @@ import {
   IsOptional,
   IsString,
   Length,
+  Max,
   MaxLength,
   Min,
 } from 'class-validator';
+import {
+  PRODUCT_UNIT_PRICE_MAX_CENTS,
+  PRODUCT_UNIT_WEIGHT_MAX_GRAMS,
+} from '../products.constants.js';
 
 export class CreateProductDto {
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
@@ -23,10 +28,12 @@ export class CreateProductDto {
   // Price in cents
   @IsInt()
   @Min(0)
+  @Max(PRODUCT_UNIT_PRICE_MAX_CENTS)
   unitPrice!: number;
 
   @IsInt()
   @Min(1)
+  @Max(PRODUCT_UNIT_WEIGHT_MAX_GRAMS)
   unitWeightGrams!: number;
 
   @IsOptional()
