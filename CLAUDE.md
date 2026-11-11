@@ -59,6 +59,7 @@ npm run lint && npm run build && npm test   # the checks CI runs
 - Any check that depends on current data goes inside the write itself, using an atomic operation (`findOneAndUpdate` or `updateOne` with the condition in the filter). Do not read, check, then write.
 - Any business operation that writes to more than one document runs in a transaction, and the session is passed to every query inside it.
 - Never assume atomicity or consistency without enforcing it in code.
+- `sanitizeFilter` is on: wrap every operator object in a query filter with `trustedOperator()`, assert the wrap in the service unit test, and cover that query with an e2e test.
 
 ## Working agreements
 
