@@ -1,0 +1,46 @@
+@baseUrl = http://localhost:3000
+
+# App-wide hardening checks: middleware, global pipe and limits.
+
+### CORS REQUESTS
+# Needs CORS_ORIGINS=http://localhost:5173 in .env, then a restart.
+--------------------------------------------------------------------------------------------------
+
+### CORS: allowed origin (expect Access-Control-Allow-Origin: http://localhost:5173)
+GET {{baseUrl}}/batches
+Origin: http://localhost:5173
+
+### CORS: disallowed origin (expect no Access-Control-Allow-Origin header, still 200)
+GET {{baseUrl}}/batches
+Origin: http://evil.example
+
+### CORS: no Origin header, as from a non-browser client (expect no Access-Control-Allow-Origin header)
+GET {{baseUrl}}/batches
+
+### HEADER REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### Helmet: security headers (expect Content-Security-Policy, Strict-Transport-Security, X-Content-Type-Options: nosniff, no X-Powered-By)
+GET {{baseUrl}}/batches
+
+### BODY SIZE REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### Body limit: 20 kB JSON body, over the 16 kB limit (expect 413)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+< ./fixtures/oversized-body.json
+
+### OPERATOR INJECTION REQUESTS
+--------------------------------------------------------------------------------------------------
+
+### Operator payload: an object where a string is expected, IsString (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": { "$ne": null },
+  "unitPrice": 100,
+  "unitWeightGrams": 100
+}
