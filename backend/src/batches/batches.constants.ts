@@ -4,3 +4,4 @@ export const BATCH_MAX_WEIGHT_BELOW_CURRENT =
 export const BATCH_TRANSITION_NOT_ALLOWED =
   'This status transition is not allowed.';
 export const BATCH_DELETE_NOT_DRAFT = 'Only draft batches can be deleted.';
+export const BATCH_WEIGHT_LIMIT_MAX_GRAMS = 500_000;

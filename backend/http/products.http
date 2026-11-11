@@ -67,6 +67,16 @@ Content-Type: application/json
   "unitWeightGrams": 100
 }
 
+### Invalid: price above the 100000-cent maximum (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Price too high",
+  "unitPrice": 100001,
+  "unitWeightGrams": 100
+}
+
 ### Invalid: weight must be at least 1 gram (expect 400)
 POST {{baseUrl}}/products
 Content-Type: application/json
@@ -75,6 +85,16 @@ Content-Type: application/json
   "name": "Zero weight",
   "unitPrice": 100,
   "unitWeightGrams": 0
+}
+
+### Invalid: weight above the 30000-gram maximum (expect 400)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Too heavy",
+  "unitPrice": 100,
+  "unitWeightGrams": 30001
 }
 
 ### Invalid: missing required fields (expect 400)

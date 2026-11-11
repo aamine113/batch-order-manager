@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { baseSchemaOptions } from '../../common/schema/base-schema-options.js';
+import { BATCH_WEIGHT_LIMIT_MAX_GRAMS } from '../batches.constants.js';
 import { BatchStatus } from '../enums/batch-status.enum.js';
 
 @Schema(baseSchemaOptions)
@@ -10,6 +11,7 @@ export class Batch {
   @Prop({
     required: true,
     min: 1,
+    max: BATCH_WEIGHT_LIMIT_MAX_GRAMS,
     validate: {
       validator: Number.isInteger,
       message: 'maxWeightGrams must be an integer',

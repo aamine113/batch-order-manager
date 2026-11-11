@@ -45,6 +45,16 @@ Content-Type: application/json
   "orderDeadline": "2100-12-01T00:00:00.000Z"
 }
 
+### Invalid: maximum weight above the 500000-gram limit (expect 400)
+POST {{baseUrl}}/batches
+Content-Type: application/json
+
+{
+  "name": "Too heavy",
+  "maxWeightGrams": 500001,
+  "orderDeadline": "2100-12-01T00:00:00.000Z"
+}
+
 ### Invalid: non-integer maximum weight (expect 400)
 POST {{baseUrl}}/batches
 Content-Type: application/json
