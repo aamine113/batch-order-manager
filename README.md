@@ -31,4 +31,9 @@ npm run start:dev
 ```bash
 cd backend
 npm run lint && npm run build && npm test
+
+# End-to-end tests, against the MongoDB container above
+npm run test:e2e
 ```
+
+CI runs both on every pull request.

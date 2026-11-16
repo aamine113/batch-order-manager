@@ -22,12 +22,13 @@ Order manager for group order batches with a weight limit. It is also a portfoli
 Run from `backend/`:
 
 ```bash
-npm run lint && npm run build && npm test   # the checks CI runs
+npm run lint && npm run build && npm test   # the CI `backend` job, also run by /commit and /pr
+npm run test:e2e                            # the CI `e2e` job; needs the database running
 ```
 
 - Start the database from the repository root: `docker compose up -d` (Docker Desktop must be running).
 - Environment: copy `backend/.env.example` to `backend/.env`. Never commit `.env`.
-- End-to-end tests are not in CI yet.
+- `/commit` and `/pr` do not run the end-to-end tests: CI catches them.
 
 ## Conventions
 
