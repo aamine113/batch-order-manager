@@ -25,3 +25,29 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    # A hung test would otherwise run until the 6-hour default.
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      # Same single-node replica set as local development. `--wait` blocks
+      # until the healthcheck passes, which also initiates the replica set.
+      - name: Start MongoDB
+        run: docker compose up -d --wait
+        working-directory: .
+      - run: npm ci
+      - run: npm run test:e2e
+      - name: Show MongoDB logs
+        if: failure()
+        run: docker compose logs mongo
+        working-directory: .
