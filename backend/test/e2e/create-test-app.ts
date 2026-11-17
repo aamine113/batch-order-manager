@@ -33,7 +33,11 @@ export async function createTestApp(): Promise<NestExpressApplication> {
   const app = moduleRef.createNestApplication<NestExpressApplication>();
   configureApp(app);
   try {
-    await app.init();
+    // Listen once on a random local port. Given a server that is not
+    // listening, supertest starts it on the first request, makes every
+    // concurrent request wait with its own `listening` listener (more than 10
+    // trigger MaxListenersExceededWarning), and closes it after the last one.
+    await app.listen(0, '127.0.0.1');
     // autoIndex builds indexes in the background: wait for every model, so
     // tests that rely on a unique index do not race the build.
     const { models } = getConnection(app);
